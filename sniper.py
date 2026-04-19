@@ -1,23 +1,45 @@
-import re
+import os
+import asyncio
 from telethon import TelegramClient, events
 
-# Configuration
-api_id = 38332852
-api_hash = '8026e47ad6f1f81686c93e5fb5cb526a'
-source_id = -10017915667 
-dest_id = 6376176715      
+# --- CONFIGURATION ---
+api_id = 26524317
+api_hash = '977054238e89547d21d60762df7a527c'
+phone_number = '+2348142773326'
 
+# This script will save the session to a file automatically
 client = TelegramClient('sniper_session', api_id, api_hash)
 
-@client.on(events.NewMessage(chats=source_id))
-async def handler(event):
-    # Extracts Solana address
-    match = re.search(r'[1-9A-HJ-NP-Za-km-z]{32,44}', event.raw_text)
-    if match:
-        address = match.group(0)
-        await client.send_message(dest_id, address)
-        print(f"🚀 Sent to BONKbot: {address}")
+async def main():
+    print("Connecting to Telegram...")
+    await client.connect()
+    
+    if not await client.is_user_authorized():
+        print(f"Sending code to {phone_number}...")
+        # This sends the code to your Telegram app
+        sent_code = await client.send_code_request(phone_number)
+        
+        print("!!! ACTION REQUIRED !!!")
+        print("Check your Telegram app for a 5-digit code.")
+        print("Since your keyboard is blocked, you have 2 minutes to")
+        print("write the code in a file named 'code.txt' in this repo.")
+        
+        # We wait for you to create a file named code.txt with the digits
+        for _ in range(20): # Wait 2 minutes
+            if os.path.exists('code.txt'):
+                with open('code.txt', 'r') as f:
+                    code = f.read().strip()
+                try:
+                    await client.sign_in(phone_number, code)
+                    print("✅ Successfully Logged In!")
+                    os.remove('code.txt')
+                    break
+                except Exception as e:
+                    print(f"Error: {e}")
+            await asyncio.sleep(10)
+    
+    print("⚡ Sniper is LIVE!")
+    # ... rest of your sniper code here ...
 
-print("⚡ Sniper is LIVE!")
-client.start(phone='+2348142773326')
-client.run_until_disconnected()
+asyncio.run(main())
+
