@@ -1,0 +1,19 @@
+name: GitHub Sniper
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Telethon
+        run: pip install telethon
+      - name: Run
+        run: python sniper.py
+        
