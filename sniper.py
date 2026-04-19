@@ -1,45 +1,35 @@
-import os
-import asyncio
+import os, asyncio, re
 from telethon import TelegramClient, events
 
-# --- CONFIGURATION ---
 api_id = 26524317
 api_hash = '977054238e89547d21d60762df7a527c'
-phone_number = '+2348142773326'
+phone = '+2348142773326'
 
-# This script will save the session to a file automatically
 client = TelegramClient('sniper_session', api_id, api_hash)
 
 async def main():
-    print("Connecting to Telegram...")
     await client.connect()
-    
     if not await client.is_user_authorized():
-        print(f"Sending code to {phone_number}...")
-        # This sends the code to your Telegram app
-        sent_code = await client.send_code_request(phone_number)
-        
-        print("!!! ACTION REQUIRED !!!")
-        print("Check your Telegram app for a 5-digit code.")
-        print("Since your keyboard is blocked, you have 2 minutes to")
-        print("write the code in a file named 'code.txt' in this repo.")
-        
-        # We wait for you to create a file named code.txt with the digits
-        for _ in range(20): # Wait 2 minutes
+        print("Sending code to Telegram...")
+        await client.send_code_request(phone)
+        print("WAITING FOR code.txt FILE...")
+        # Wait up to 5 minutes for you to create the file
+        for _ in range(30): 
             if os.path.exists('code.txt'):
                 with open('code.txt', 'r') as f:
-                    code = f.read().strip()
-                try:
-                    await client.sign_in(phone_number, code)
-                    print("✅ Successfully Logged In!")
-                    os.remove('code.txt')
-                    break
-                except Exception as e:
-                    print(f"Error: {e}")
+                    val = f.read().strip()
+                await client.sign_in(phone, val)
+                print("✅ LOGGED IN!")
+                os.remove('code.txt')
+                break
             await asyncio.sleep(10)
-    
+
     print("⚡ Sniper is LIVE!")
-    # ... rest of your sniper code here ...
+    @client.on(events.NewMessage(chats='https://t.me/SOLANA_TOKENS_CA'))
+    async def h(e):
+        if e.raw_text:
+            cas = re.findall(r'[1-9A-HJ-NP-Za-km-z]{32,44}', e.raw_text)
+            for ca in cas: await client.send_message('@BonkBot', ca)
+    await client.run_until_disconnected()
 
 asyncio.run(main())
-
