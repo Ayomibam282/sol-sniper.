@@ -19,5 +19,5 @@ async def handler(event):
         print(f"🚀 Sent to BONKbot: {address}")
 
 print("⚡ Sniper is LIVE!")
-client.start()
+client.start(phone='+2348142773326')
 client.run_until_disconnected()
