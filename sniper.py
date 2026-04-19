@@ -10,16 +10,16 @@ client = TelegramClient('sniper_session', api_id, api_hash)
 async def main():
     await client.connect()
     if not await client.is_user_authorized():
-        print("Sending code to Telegram...")
+        print("Requesting code...")
         await client.send_code_request(phone)
-        print("WAITING FOR code.txt FILE...")
-        # Wait up to 5 minutes for you to create the file
+        print("WAITING FOR code.txt...")
+        # Loops for 5 mins checking for the file
         for _ in range(30): 
             if os.path.exists('code.txt'):
                 with open('code.txt', 'r') as f:
                     val = f.read().strip()
                 await client.sign_in(phone, val)
-                print("✅ LOGGED IN!")
+                print("✅ AUTHORIZED!")
                 os.remove('code.txt')
                 break
             await asyncio.sleep(10)
